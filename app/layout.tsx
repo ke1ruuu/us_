@@ -21,7 +21,29 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Us | Shared Space",
-  description: "A private corner for us.",
+  description: "A private corner for us to share moments and memories.",
+  openGraph: {
+    title: "Us | Shared Space",
+    description: "A private corner for us to share moments and memories.",
+    url: "https://mumints.vercel.app", // Fallback URL, override with your actual domain if different
+    siteName: "Us",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Us Shared Space Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Us | Shared Space",
+    description: "A private corner for us to share moments and memories.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

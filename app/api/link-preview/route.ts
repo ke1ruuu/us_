@@ -27,7 +27,6 @@ export async function GET(request: Request) {
 
         // Instagram
         if (url.includes("instagram.com")) {
-            // Instagram OEmbed is a bit more restrictive, but let's try the public one
             const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(url)}`;
             const response = await fetch(oembedUrl);
             if (response.ok) {
