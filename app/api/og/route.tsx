@@ -15,32 +15,18 @@ export async function GET() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         backgroundColor: '#0a0a0a',
-                        backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(250, 204, 21, 0.05) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(250, 204, 21, 0.03) 0%, transparent 50%)',
                     }}
                 >
-                    {/* Decorative background elements */}
+                    {/* Background Glows using radial gradients (Satori compatible) */}
                     <div
                         style={{
                             position: 'absolute',
-                            top: '10%',
-                            left: '10%',
-                            width: '400px',
-                            height: '400px',
-                            borderRadius: '100%',
-                            background: 'rgba(250, 204, 21, 0.05)',
-                            filter: 'blur(100px)',
-                        }}
-                    />
-                    <div
-                        style={{
-                            position: 'absolute',
-                            bottom: '10%',
-                            right: '10%',
-                            width: '300px',
-                            height: '300px',
-                            borderRadius: '100%',
-                            background: 'rgba(250, 204, 21, 0.03)',
-                            filter: 'blur(80px)',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(250, 204, 21, 0.1) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(250, 204, 21, 0.05) 0%, transparent 60%)',
                         }}
                     />
 
@@ -50,11 +36,10 @@ export async function GET() {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            padding: '40px',
-                            border: '1px solid rgba(250, 204, 21, 0.2)',
-                            borderRadius: '40px',
-                            backgroundColor: 'rgba(250, 204, 21, 0.05)',
-                            backdropFilter: 'blur(10px)',
+                            padding: '60px 80px',
+                            border: '2px solid rgba(250, 204, 21, 0.2)',
+                            borderRadius: '50px',
+                            backgroundColor: 'rgba(15, 15, 15, 0.8)',
                         }}
                     >
                         <div
@@ -62,16 +47,17 @@ export async function GET() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '25px',
+                                width: '120px',
+                                height: '120px',
+                                borderRadius: '30px',
                                 background: 'linear-gradient(to bottom right, #facc15, #eab308)',
-                                marginBottom: '20px',
+                                marginBottom: '30px',
+                                boxShadow: '0 10px 30px rgba(250, 204, 21, 0.3)',
                             }}
                         >
                             <svg
-                                width="60"
-                                height="60"
+                                width="70"
+                                height="70"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="#000"
@@ -83,30 +69,27 @@ export async function GET() {
                             </svg>
                         </div>
 
-                        <h1
-                            style={{
-                                fontSize: '84px',
-                                fontWeight: '900',
-                                color: 'white',
-                                margin: '0',
-                                display: 'flex',
-                            }}
-                        >
-                            <span style={{ color: '#facc15', fontStyle: 'italic', marginRight: '16px' }}>US</span>
-                            SPACE
-                        </h1>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <span style={{ fontSize: '96px', fontWeight: '900', color: '#facc15', fontStyle: 'italic', marginRight: '20px' }}>US</span>
+                            <span style={{ fontSize: '96px', fontWeight: '900', color: 'white' }}>SPACE</span>
+                        </div>
+
                         <p
                             style={{
-                                fontSize: '24px',
+                                fontSize: '28px',
                                 fontWeight: '500',
-                                color: 'rgba(255, 255, 255, 0.6)',
-                                marginTop: '12px',
-                                letterSpacing: '0.1em',
+                                color: 'rgba(255, 255, 255, 0.5)',
+                                marginTop: '10px',
+                                letterSpacing: '0.2em',
+                                textTransform: 'uppercase',
                             }}
                         >
-                            A PRIVATE CORNER FOR US.
+                            A private corner for us
                         </p>
                     </div>
+
+                    {/* Subtle corner elements */}
+                    <div style={{ position: 'absolute', top: 40, right: 40, color: 'rgba(250, 204, 21, 0.2)', fontSize: '20px', fontWeight: 'bold' }}>EST. 2026</div>
                 </div>
             ),
             {
@@ -115,7 +98,6 @@ export async function GET() {
             }
         );
     } catch (e: any) {
-        console.log(`${e.message}`);
         return new Response(`Failed to generate the image`, {
             status: 500,
         });

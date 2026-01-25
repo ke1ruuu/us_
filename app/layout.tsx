@@ -20,6 +20,7 @@ const outfit = Outfit({
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mumints.vercel.app"),
   title: "Us | Shared Space",
   description: "A private corner for us to share moments and memories.",
   openGraph: {
