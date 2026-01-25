@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: "Us",
     images: [
       {
-        url: "/og-image.png",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "Us Shared Space Preview",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Us | Shared Space",
     description: "A private corner for us to share moments and memories.",
-    images: ["/og-image.png"],
+    images: ["/api/og"],
   },
 };
 
