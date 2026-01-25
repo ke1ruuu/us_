@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -73,6 +75,13 @@ export function RichTextEditor({
             onChange(editor.getHTML());
         },
     });
+
+    // Support external content updates (like removing links)
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            editor.commands.setContent(content, { emitUpdate: false });
+        }
+    }, [content, editor]);
 
     if (!editor) {
         return null;

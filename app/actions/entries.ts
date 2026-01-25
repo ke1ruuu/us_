@@ -14,8 +14,17 @@ export async function createEntry(formData: FormData) {
     const type = (formData.get("type") as string) || "note";
     const imageUrlField = formData.get("image_url") as string;
     const imageFile = formData.get("image") as File;
+    const linkDataField = formData.get("link_data") as string;
 
     let finalImageUrl = imageUrlField;
+    let linkData = null;
+    if (linkDataField) {
+        try {
+            linkData = JSON.parse(linkDataField);
+        } catch (e) {
+            console.error("Failed to parse link_data", e);
+        }
+    }
 
     const supabase = createAdminClient();
 
@@ -51,6 +60,7 @@ export async function createEntry(formData: FormData) {
         type,
         content,
         image_url: finalImageUrl,
+        link_data: linkData
     });
 
     if (error) {

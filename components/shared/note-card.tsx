@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { LinkCard } from "./link-card";
 
 import {
     Sheet,
@@ -120,6 +121,10 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                                 <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent" />
                             )}
                         </div>
+                    )}
+
+                    {entry.link_data && (
+                        <LinkCard data={entry.link_data} />
                     )}
 
                     {isLongContent && (

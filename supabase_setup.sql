@@ -1,4 +1,5 @@
 -- Run this in your Supabase SQL Editor to enable the custom login logic
+-- ALTER TABLE public.entries ADD COLUMN IF NOT EXISTS link_data JSONB;
 
 CREATE OR REPLACE FUNCTION public.login_user(p_username text, p_password text)
 RETURNS TABLE (session_id uuid, display_name text) 

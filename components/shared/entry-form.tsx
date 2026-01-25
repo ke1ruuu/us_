@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { RichTextEditor } from "./rich-text-editor";
 import { motion, AnimatePresence } from "framer-motion";
+import { LinkCard } from "./link-card";
+import { useEffect } from "react";
 
 export function EntryForm() {
     const formRef = useRef<HTMLFormElement>(null);
@@ -18,6 +20,47 @@ export function EntryForm() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [richContent, setRichContent] = useState("");
+    const [linkData, setLinkData] = useState<any>(null);
+    const [isFetchingLink, setIsFetchingLink] = useState(false);
+
+    // Link detection effect
+    useEffect(() => {
+        const detectLink = async () => {
+            if (linkData) return; // Only one link preview for now
+
+            const urlRegex = /(https?:\/\/[^\s<]+)/g;
+            const matches = richContent.match(urlRegex);
+
+            if (matches && matches.length > 0) {
+                const url = matches[0];
+                // Check if it's a Spotify, YouTube, or Instagram link
+                if (url.includes("spotify.com") || url.includes("youtube.com") || url.includes("youtu.be") || url.includes("instagram.com")) {
+                    setIsFetchingLink(true);
+                    try {
+                        const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            setLinkData({ ...data, url });
+
+                            // Remove the link from the editor content
+                            // This handles raw text URLs and Tiptap's auto-linked <a> tags
+                            const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            const linkRegex = new RegExp(`(<a [^>]*href=["']${escapedUrl}["'][^>]*>.*?</a>)|(${escapedUrl})`, 'g');
+                            const strippedContent = richContent.replace(linkRegex, "");
+                            setRichContent(strippedContent);
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch link preview", error);
+                    } finally {
+                        setIsFetchingLink(false);
+                    }
+                }
+            }
+        };
+
+        const timer = setTimeout(detectLink, 1000);
+        return () => clearTimeout(timer);
+    }, [richContent, linkData]);
 
     const [state, formAction, isPending] = useActionState(async (prevState: any, formData: FormData) => {
         // If we have a selected file, ensure it's in the formData
@@ -28,17 +71,20 @@ export function EntryForm() {
         // Set the rich content
         formData.set("content", richContent);
 
+        if (linkData) {
+            formData.set("link_data", JSON.stringify(linkData));
+        }
+
         const result = await createEntry(formData);
         if (result.success) {
-            toast.success("✨ Moment shared!", {
-                description: "Your memory has been captured beautifully.",
-            });
+            toast.success("Moment shared!");
             formRef.current?.reset();
             setImageUrl("");
             setSelectedFile(null);
             setPreviewUrl(null);
             setShowUrlInput(false);
             setRichContent("");
+            setLinkData(null);
         } else if (result.error) {
             toast.error("Oops!", {
                 description: result.error,
@@ -79,7 +125,6 @@ export function EntryForm() {
                         name="image"
                     />
 
-                    {/* Media Preview Section */}
                     <AnimatePresence>
                         {(previewUrl || imageUrl) && (
                             <motion.div
@@ -112,7 +157,6 @@ export function EntryForm() {
                         )}
                     </AnimatePresence>
 
-                    {/* URL Input */}
                     <AnimatePresence>
                         {showUrlInput && !previewUrl && (
                             <motion.div
@@ -135,7 +179,6 @@ export function EntryForm() {
                         )}
                     </AnimatePresence>
 
-                    {/* Rich Text Editor */}
                     <div className="p-6 pb-4">
                         <RichTextEditor
                             content={richContent}
@@ -143,9 +186,27 @@ export function EntryForm() {
                             placeholder="Write your note..."
                             className="border-0 shadow-none"
                         />
+
+                        <AnimatePresence>
+                            {linkData && (
+                                <LinkCard
+                                    data={linkData}
+                                    onRemove={() => setLinkData(null)}
+                                />
+                            )}
+                            {isFetchingLink && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary/60 animate-pulse"
+                                >
+                                    <div className="h-2 w-2 rounded-full bg-primary" />
+                                    Fetching Link Preview...
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Action Bar */}
                     <div className="flex items-center justify-between border-t border-border bg-gradient-to-r from-secondary/40 via-secondary/30 to-secondary/40 px-6 py-4">
                         <div className="flex gap-2">
                             <Button
@@ -154,8 +215,8 @@ export function EntryForm() {
                                 size="icon"
                                 onClick={() => fileInputRef.current?.click()}
                                 className={`h-10 w-10 rounded-xl transition-all ${previewUrl
-                                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                                        : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                    : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                                     }`}
                             >
                                 <Upload className="h-5 w-5" />
@@ -169,8 +230,8 @@ export function EntryForm() {
                                     if (previewUrl) clearMedia();
                                 }}
                                 className={`h-10 w-10 rounded-xl transition-all ${showUrlInput && !previewUrl
-                                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                                        : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                    : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                                     }`}
                             >
                                 <LinkIcon className="h-5 w-5" />
