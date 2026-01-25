@@ -118,6 +118,15 @@
   ::-webkit-scrollbar-thumb:hover {
     background: oklch(0.86 0.17 96.5 / 30%);
   }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Custom animations */

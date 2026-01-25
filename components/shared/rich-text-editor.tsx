@@ -109,7 +109,7 @@ export function RichTextEditor({
             }}
             disabled={disabled}
             className={cn(
-                "h-8 w-8 rounded-lg transition-all",
+                "h-8 w-8 rounded-lg transition-all flex-shrink-0",
                 isActive
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -122,7 +122,7 @@ export function RichTextEditor({
     return (
         <div className={cn("rounded-2xl border border-border bg-card overflow-hidden", className)}>
             {/* Toolbar */}
-            <div className="flex items-center gap-1 border-b border-border bg-secondary/30 px-3 py-2">
+            <div className="flex items-center gap-1 border-b border-border bg-secondary/30 px-3 py-2 overflow-x-auto scrollbar-hide">
                 <MenuButton
                     onClick={() => editor.chain().focus().toggleBold().run()}
                     isActive={editor.isActive("bold")}

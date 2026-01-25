@@ -20,7 +20,7 @@ export default async function DashboardLayout({
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[radial-gradient(circle_at_50%_50%,rgba(250,204,21,0.03),transparent_70%)]" />
             </div>
 
-            <main className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+            <main className="mx-auto max-w-[1200px] px-4 sm:px-8 py-8 md:py-16">
                 {children}
             </main>
 

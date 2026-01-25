@@ -8,19 +8,19 @@ export default async function FeedPage() {
     const entries = await getEntries();
 
     return (
-        <div className="space-y-12">
+        <div className="space-y-8 md:space-y-12">
             <header className="text-center relative">
                 <div className="absolute -top-8 -left-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
                 <div className="absolute -top-4 -right-8 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
 
                 <div className="relative">
-                    <h1 className="font-outfit text-5xl md:text-6xl font-black uppercase tracking-tighter text-foreground">
+                    <h1 className="font-outfit text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter text-foreground">
                         <span className="text-primary italic bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">GALLERY</span>
                     </h1>
                     {entries.length > 0 && (
-                        <div className="mt-6 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-secondary/50 border border-border">
-                            <ImageIcon className="h-4 w-4 text-primary" />
-                            <span className="font-outfit text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <div className="mt-4 md:mt-6 inline-flex items-center gap-3 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-secondary/50 border border-border">
+                            <ImageIcon className="h-3.5 w-3.5 md:h-4 w-4 text-primary" />
+                            <span className="font-outfit text-[10px] md:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 {entries.length} {entries.length === 1 ? 'Memory' : 'Memories'} Captured
                             </span>
                         </div>
@@ -30,7 +30,7 @@ export default async function FeedPage() {
 
             <section>
                 {entries.length > 0 ? (
-                    <div className="columns-1 md:columns-2 gap-6 space-y-6">
+                    <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 md:gap-6 space-y-4 md:space-y-6">
                         {entries.map((entry: any, index: number) => (
                             <div
                                 key={entry.id}

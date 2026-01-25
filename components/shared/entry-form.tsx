@@ -179,7 +179,7 @@ export function EntryForm() {
                         )}
                     </AnimatePresence>
 
-                    <div className="p-6 pb-4">
+                    <div className="p-4 sm:p-6 pb-2 sm:pb-4">
                         <RichTextEditor
                             content={richContent}
                             onChange={setRichContent}
@@ -207,8 +207,8 @@ export function EntryForm() {
                         </AnimatePresence>
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-border bg-gradient-to-r from-secondary/40 via-secondary/30 to-secondary/40 px-6 py-4">
-                        <div className="flex gap-2">
+                    <div className="flex items-center justify-between border-t border-border bg-gradient-to-r from-secondary/40 via-secondary/30 to-secondary/40 px-4 sm:px-6 py-3 sm:py-4">
+                        <div className="flex gap-1.5 sm:gap-2">
                             <Button
                                 type="button"
                                 variant="ghost"

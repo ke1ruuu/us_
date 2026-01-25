@@ -84,7 +84,7 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                             variant="ghost"
                             size="icon"
                             disabled={isDeleting}
-                            className="h-8 w-8 text-muted-foreground opacity-0 transition-all hover:text-red-500 group-hover:opacity-100 hover:bg-red-500/10"
+                            className="h-8 w-8 text-muted-foreground opacity-100 transition-all hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 hover:bg-red-500/10"
                             onClick={handleDelete}
                         >
                             <Trash2 className="h-4 w-4" />
@@ -134,7 +134,7 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                                     Read More
                                 </button>
                             </SheetTrigger>
-                            <SheetContent side="right" className="border-border bg-card overflow-y-auto">
+                            <SheetContent side="right" className="w-[90%] sm:max-w-md border-border bg-card overflow-y-auto p-4 sm:p-6">
                                 <SheetHeader className="mb-6">
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-10 w-10 border-2 border-primary/20 ring-2 ring-primary/5">

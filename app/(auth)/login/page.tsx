@@ -11,7 +11,7 @@ export default function LoginPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(250,204,21,0.05),transparent_70%)]" />
             </div>
 
-            <div className="w-full max-w-md space-y-12 rounded-[2.5rem] border border-border bg-gradient-to-br from-card via-card to-card/80 p-12 shadow-2xl backdrop-blur-sm relative">
+            <div className="w-full max-w-[440px] space-y-8 sm:space-y-12 rounded-[2rem] sm:rounded-[2.5rem] border border-border bg-gradient-to-br from-card via-card to-card/80 p-6 sm:p-12 shadow-2xl backdrop-blur-sm relative">
                 {/* Inner glow */}
                 <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
 
