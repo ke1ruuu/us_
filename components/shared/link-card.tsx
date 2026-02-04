@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, ExternalLink, X, Play, Youtube, Instagram, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface LinkCardProps {
     data: {
@@ -19,6 +19,13 @@ interface LinkCardProps {
 
 export function LinkCard({ data, onRemove }: LinkCardProps) {
     const [showEmbed, setShowEmbed] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     const provider = data.provider_name?.toLowerCase() || "";
     const isSpotify = provider === "spotify" || data.url?.includes("spotify.com");
@@ -57,6 +64,7 @@ export function LinkCard({ data, onRemove }: LinkCardProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className="group relative mt-4 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 shadow-xl backdrop-blur-sm transition-all hover:border-primary/40"
+            suppressHydrationWarning
         >
             <AnimatePresence mode="wait">
                 {showEmbed && embedUrl ? (
@@ -137,8 +145,14 @@ export function LinkCard({ data, onRemove }: LinkCardProps) {
                             <h4 className="truncate font-outfit text-sm font-bold text-foreground mt-1.5">
                                 {data.title || "Untitled Link"}
                             </h4>
-                            <p className="truncate text-xs text-muted-foreground/80 font-medium">
-                                {data.author_name || (data.url && new URL(data.url).hostname)}
+                            <p className="truncate text-xs text-muted-foreground/80 font-medium" suppressHydrationWarning>
+                                {data.author_name || (() => {
+                                    try {
+                                        return data.url ? new URL(data.url).hostname : "";
+                                    } catch (e) {
+                                        return data.url || "";
+                                    }
+                                })()}
                             </p>
 
                             <div className="mt-3 flex items-center gap-3">

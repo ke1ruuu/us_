@@ -13,10 +13,14 @@ export async function createEntry(formData: FormData) {
     const content = formData.get("content") as string;
     const type = (formData.get("type") as string) || "note";
     const imageUrlField = formData.get("image_url") as string;
-    const imageFile = formData.get("image") as File;
+    const imageFiles = formData.getAll("images") as File[];
     const linkDataField = formData.get("link_data") as string;
 
-    let finalImageUrl = imageUrlField;
+    let finalImageUrls: string[] = [];
+    if (imageUrlField) {
+        finalImageUrls.push(imageUrlField);
+    }
+
     let linkData = null;
     if (linkDataField) {
         try {
@@ -28,30 +32,33 @@ export async function createEntry(formData: FormData) {
 
     const supabase = createAdminClient();
 
-    if (imageFile && imageFile.size > 0) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
+    // Handle multiple image uploads
+    for (const imageFile of imageFiles) {
+        if (imageFile && imageFile.size > 0) {
+            const fileExt = imageFile.name.split('.').pop();
+            const fileName = `${user.id}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+            const filePath = `${fileName}`;
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from("moments")
-            .upload(filePath, imageFile, {
-                contentType: imageFile.type,
-            });
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from("moments")
+                .upload(filePath, imageFile, {
+                    contentType: imageFile.type,
+                });
 
-        if (uploadError) {
-            console.error("Error uploading image:", uploadError);
-            return { error: "Failed to upload image" };
+            if (uploadError) {
+                console.error("Error uploading image:", uploadError);
+                continue; // Skip failed uploads
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from("moments")
+                .getPublicUrl(filePath);
+
+            finalImageUrls.push(publicUrl);
         }
-
-        const { data: { publicUrl } } = supabase.storage
-            .from("moments")
-            .getPublicUrl(filePath);
-
-        finalImageUrl = publicUrl;
     }
 
-    if (!content && !finalImageUrl) {
+    if (!content && finalImageUrls.length === 0) {
         return { error: "Content is required" };
     }
 
@@ -59,7 +66,8 @@ export async function createEntry(formData: FormData) {
         author_id: user.id,
         type,
         content,
-        image_url: finalImageUrl,
+        image_url: finalImageUrls[0] || null, // Keep for backward compatibility
+        image_urls: finalImageUrls,
         link_data: linkData
     });
 

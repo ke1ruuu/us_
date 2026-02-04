@@ -17,8 +17,8 @@ export function EntryForm() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showUrlInput, setShowUrlInput] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [richContent, setRichContent] = useState("");
     const [linkData, setLinkData] = useState<any>(null);
     const [isFetchingLink, setIsFetchingLink] = useState(false);
@@ -63,10 +63,10 @@ export function EntryForm() {
     }, [richContent, linkData]);
 
     const [state, formAction, isPending] = useActionState(async (prevState: any, formData: FormData) => {
-        // If we have a selected file, ensure it's in the formData
-        if (selectedFile) {
-            formData.set("image", selectedFile);
-        }
+        // Add all selected files to formData
+        selectedFiles.forEach(file => {
+            formData.append("images", file);
+        });
 
         // Set the rich content
         formData.set("content", richContent);
@@ -80,8 +80,8 @@ export function EntryForm() {
             toast.success("Moment shared!");
             formRef.current?.reset();
             setImageUrl("");
-            setSelectedFile(null);
-            setPreviewUrl(null);
+            setSelectedFiles([]);
+            setPreviewUrls([]);
             setShowUrlInput(false);
             setRichContent("");
             setLinkData(null);
@@ -94,20 +94,29 @@ export function EntryForm() {
     }, null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setSelectedFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewUrl(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            const newFiles = [...selectedFiles, ...files];
+            setSelectedFiles(newFiles);
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setPreviewUrls(prev => [...prev, reader.result as string]);
+                };
+                reader.readAsDataURL(file);
+            });
         }
     };
 
+    const removeFile = (index: number) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+        setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    };
+
     const clearMedia = () => {
-        setSelectedFile(null);
-        setPreviewUrl(null);
+        setSelectedFiles([]);
+        setPreviewUrls([]);
         setImageUrl("");
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
@@ -118,47 +127,68 @@ export function EntryForm() {
                 <form ref={formRef} action={formAction}>
                     <input
                         type="file"
+                        multiple
                         accept="image/*"
                         className="hidden"
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        name="image"
                     />
 
                     <AnimatePresence>
-                        {(previewUrl || imageUrl) && (
+                        {(previewUrls.length > 0 || imageUrl) && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
                                 exit={{ opacity: 0, height: 0 }}
                                 className="relative group w-full bg-secondary/20 overflow-hidden"
                             >
-                                <div className="relative aspect-video w-full">
-                                    <img
-                                        src={previewUrl || imageUrl}
-                                        alt="Preview"
-                                        className="h-full w-full object-cover"
-                                        onError={() => {
-                                            if (imageUrl) toast.error("Invalid image URL");
-                                        }}
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="flex gap-2 p-4 overflow-x-auto scrollbar-hide">
+                                    {imageUrl && !previewUrls.length && (
+                                        <div className="relative aspect-video w-full flex-shrink-0">
+                                            <img
+                                                src={imageUrl}
+                                                alt="Preview"
+                                                className="h-full w-full object-cover rounded-lg"
+                                                onError={() => {
+                                                    if (imageUrl) toast.error("Invalid image URL");
+                                                }}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={clearMedia}
+                                                className="absolute right-2 top-2 h-7 w-7 rounded-full shadow-lg"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                    {previewUrls.map((url, index) => (
+                                        <div key={index} className="relative aspect-square h-40 flex-shrink-0">
+                                            <img
+                                                src={url}
+                                                alt={`Preview ${index}`}
+                                                className="h-full w-full object-cover rounded-lg border border-border/50"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                onClick={() => removeFile(index)}
+                                                className="absolute right-2 top-2 h-7 w-7 rounded-full shadow-lg"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    ))}
                                 </div>
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    onClick={clearMedia}
-                                    className="absolute right-4 top-4 h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110"
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
                     <AnimatePresence>
-                        {showUrlInput && !previewUrl && (
+                        {showUrlInput && previewUrls.length === 0 && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
@@ -214,7 +244,7 @@ export function EntryForm() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => fileInputRef.current?.click()}
-                                className={`h-10 w-10 rounded-xl transition-all ${previewUrl
+                                className={`h-10 w-10 rounded-xl transition-all ${previewUrls.length > 0
                                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                                     : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                                     }`}
@@ -227,9 +257,9 @@ export function EntryForm() {
                                 size="icon"
                                 onClick={() => {
                                     setShowUrlInput(!showUrlInput);
-                                    if (previewUrl) clearMedia();
+                                    if (previewUrls.length > 0) clearMedia();
                                 }}
-                                className={`h-10 w-10 rounded-xl transition-all ${showUrlInput && !previewUrl
+                                className={`h-10 w-10 rounded-xl transition-all ${showUrlInput && previewUrls.length === 0
                                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                                     : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
                                     }`}

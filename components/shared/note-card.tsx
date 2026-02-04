@@ -8,9 +8,10 @@ import { deleteEntry } from "@/app/actions/entries";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { LinkCard } from "./link-card";
+import { ImageModal } from "./image-modal";
 
 import {
     Sheet,
@@ -28,6 +29,22 @@ interface NoteCardProps {
 export function NoteCard({ entry, currentUserId }: NoteCardProps) {
     const isAuthor = entry.author_id === currentUserId;
     const [isDeleting, setIsDeleting] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+    const allImages = entry.image_urls && entry.image_urls.length > 0
+        ? entry.image_urls
+        : entry.image_url ? [entry.image_url] : [];
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const openModal = (index: number) => {
+        setSelectedImageIndex(index);
+        setIsModalOpen(true);
+    };
 
     const handleDelete = async () => {
         setIsDeleting(true);
@@ -42,6 +59,12 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
 
     const isLongContent = entry.content?.length > 280;
 
+    if (!mounted) {
+        return (
+            <div className="h-[200px] w-full rounded-[2.5rem] bg-card/50 animate-pulse border border-border" />
+        );
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -50,8 +73,38 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
             transition={{ duration: 0.3 }}
         >
             <Card className="group overflow-hidden border-border bg-gradient-to-br from-card via-card to-card/90 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/20">
-                {entry.image_url && (
-                    <div className="relative w-full overflow-hidden">
+                {/* Multi-image display */}
+                {entry.image_urls && entry.image_urls.length > 0 ? (
+                    <div className={cn(
+                        "grid gap-1 w-full overflow-hidden",
+                        entry.image_urls.length === 1 ? "grid-cols-1" :
+                            entry.image_urls.length === 2 ? "grid-cols-2" :
+                                "grid-cols-2"
+                    )}>
+                        {entry.image_urls.map((url: string, idx: number) => (
+                            <div
+                                key={idx}
+                                onClick={() => openModal(idx)}
+                                className={cn(
+                                    "relative overflow-hidden bg-secondary/20 cursor-zoom-in",
+                                    entry.image_urls.length === 3 && idx === 0 ? "row-span-2" : "",
+                                    "aspect-square"
+                                )}
+                            >
+                                <img
+                                    src={url}
+                                    alt={`Shared moment ${idx + 1}`}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+                                    loading="lazy"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ) : entry.image_url ? (
+                    <div
+                        onClick={() => openModal(0)}
+                        className="relative w-full overflow-hidden cursor-zoom-in"
+                    >
                         <img
                             src={entry.image_url}
                             alt="Shared moment"
@@ -60,7 +113,7 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
-                )}
+                ) : null}
 
                 <div className="flex items-center justify-between p-4 pb-2 bg-transparent">
                     <div className="flex items-center gap-3">
@@ -73,7 +126,7 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                             <p className="font-outfit text-sm font-bold text-foreground leading-tight">
                                 {entry.author?.display_name}
                             </p>
-                            <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1">
+                            <p className="text-[10px] font-medium text-muted-foreground flex items-center gap-1" suppressHydrationWarning>
                                 <Sparkles className="h-2.5 w-2.5" />
                                 {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
                             </p>
@@ -93,7 +146,7 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                 </div>
 
                 <CardContent className="px-4 py-2">
-                    {!entry.image_url ? (
+                    {!(entry.image_url || (entry.image_urls && entry.image_urls.length > 0)) ? (
                         <div className="relative">
                             <div
                                 className={cn(
@@ -101,6 +154,7 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                                     "max-h-[150px] overflow-hidden"
                                 )}
                                 dangerouslySetInnerHTML={{ __html: entry.content }}
+                                suppressHydrationWarning
                             />
                             {isLongContent && (
                                 <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card to-transparent" />
@@ -113,9 +167,10 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                                     "prose prose-invert max-w-none font-sans text-sm text-foreground/80 leading-relaxed transition-all duration-300",
                                     "max-h-[100px] overflow-hidden"
                                 )}
+                                suppressHydrationWarning
                             >
                                 <span className="font-bold mr-2 text-primary">{entry.author?.display_name}</span>
-                                <span dangerouslySetInnerHTML={{ __html: entry.content }} />
+                                <div className="inline prose-sm" dangerouslySetInnerHTML={{ __html: entry.content }} />
                             </div>
                             {isLongContent && (
                                 <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent" />
@@ -153,15 +208,34 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                                     </div>
                                 </SheetHeader>
 
-                                {entry.image_url && (
-                                    <div className="mb-6 overflow-hidden rounded-2xl border border-border/50">
+                                {entry.image_urls && entry.image_urls.length > 0 ? (
+                                    <div className="mb-6 grid gap-2">
+                                        {entry.image_urls.map((url: string, idx: number) => (
+                                            <div
+                                                key={idx}
+                                                onClick={() => openModal(idx)}
+                                                className="overflow-hidden rounded-2xl border border-border/50 cursor-zoom-in"
+                                            >
+                                                <img
+                                                    src={url}
+                                                    alt={`Moment detail ${idx + 1}`}
+                                                    className="w-full h-auto"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : entry.image_url ? (
+                                    <div
+                                        onClick={() => openModal(0)}
+                                        className="mb-6 overflow-hidden rounded-2xl border border-border/50 cursor-zoom-in"
+                                    >
                                         <img
                                             src={entry.image_url}
                                             alt="Moment detail"
                                             className="w-full h-auto"
                                         />
                                     </div>
-                                )}
+                                ) : null}
 
                                 <div
                                     className="prose prose-invert max-w-none font-sans text-base leading-relaxed tracking-tight text-foreground/90"
@@ -172,6 +246,13 @@ export function NoteCard({ entry, currentUserId }: NoteCardProps) {
                     )}
                 </CardContent>
             </Card>
+
+            <ImageModal
+                images={allImages}
+                initialIndex={selectedImageIndex}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
         </motion.div>
     );
 }
